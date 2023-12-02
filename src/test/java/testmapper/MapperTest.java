@@ -13,6 +13,7 @@ import ru.marzuev.model.mapper.BookMapper;
 import ru.marzuev.model.mapper.CommentMapper;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -37,35 +38,38 @@ class MapperTest {
         book = new Book(1L, "Title", "DESC", LocalDate.now());
         otherBook = new Book(2L, "NewTitle", "OTHER", LocalDate.now());
         comment = new Comment(1l, "Content");
-        commentDto = new CommentDto("Content");
+        commentDto = new CommentDto("Title", "Content");
         bookDto = new BookDto("Title", "DESC", LocalDate.now(), List.of(1L), List.of(commentDto));
     }
 
     @Test
     void toAuthorDto_whenNormal_thenReturnAuthorDto() {
-        AuthorDto newAuthor = AuthorMapper.toAuthorDto(author, List.of(book, otherBook));
-
+        author.setListBooks(List.of(book, otherBook));
+        final AuthorDto newAuthor = AuthorMapper.toAuthorDto(author);
 
         assertThat(newAuthor, equalTo(authorDto));
     }
 
     @Test
     void toAuthor_whenNormal_thenReturnAuthor() {
-        Author newAuthor = AuthorMapper.toAuthor(1L, authorDto);
+        final Author newAuthor = AuthorMapper.toAuthor(1L, authorDto);
 
         assertThat(newAuthor, equalTo(author));
     }
 
     @Test
     void toBook_whenNormal_thenReturnBook() {
-        Book newBook = BookMapper.toBook(bookDto, 1L);
+        final Book newBook = BookMapper.toBook(bookDto, 1L);
 
         assertThat(book, equalTo(newBook));
     }
 
     @Test
     void toBookDto_whenNormal_thenReturnBookDto() {
-        BookDto newBook = BookMapper.toBookDto(book, List.of(author.getId()), List.of(commentDto));
+        comment.setBook(book);
+        book.setListAuthors(List.of(author));
+        book.setListComments(List.of(comment));
+        final BookDto newBook = BookMapper.toBookDto(book);
 
         assertThat(newBook.getComments(), equalTo(bookDto.getComments()));
         assertThat(newBook, equalTo(bookDto));
@@ -73,10 +77,9 @@ class MapperTest {
 
     @Test
     void toComment_whenNormal_thenReturnComment() {
-        Comment newComment = CommentMapper.toComment(commentDto, 1L);
+        final Comment newComment = CommentMapper.toComment(commentDto, 1L);
 
         assertThat(comment.getId(), equalTo(newComment.getId()));
-        assertThat(comment.getAuthor(), equalTo(newComment.getAuthor()));
         assertThat(comment.getBook(), equalTo(newComment.getBook()));
         assertThat(comment.getContent(), equalTo(newComment.getContent()));
         assertThat(comment, equalTo(newComment));
@@ -84,7 +87,8 @@ class MapperTest {
 
     @Test
     void toCommentDto_whenNormal_thenReturnCommentDto() {
-        CommentDto newComment = CommentMapper.toCommentDto(comment);
+        comment.setBook(book);
+        final CommentDto newComment = CommentMapper.toCommentDto(comment);
 
         assertThat(newComment.getContent(), equalTo(commentDto.getContent()));
         assertThat(newComment, equalTo(commentDto));

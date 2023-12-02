@@ -64,11 +64,11 @@ class BookRepositoreTest {
 
     @Test
     void insertBook_whenNormal_thenReturnBook() throws SQLException {
-        Author newAuthor = new Author(1L, "Dan",
+        final Author newAuthor = new Author(1L, "Dan",
                 LocalDate.of(1990, 5, 12));
-        Author author = authorRepository.addAuthor(newAuthor);
-        Book book = new Book(0L, "Title", "Description", LocalDate.now());
-        Book addBook = bookRepository.addBook(book, List.of(author.getId()));
+        final Author author = authorRepository.addAuthor(newAuthor);
+        final Book book = new Book(0L, "Title", "Description", LocalDate.now());
+        final Book addBook = bookRepository.addBook(book, List.of(author.getId()));
 
         book.setId(addBook.getId());
         assertThat(book, equalTo(addBook));
@@ -76,30 +76,30 @@ class BookRepositoreTest {
 
     @Test
     void insertBook_whenTitleDuplicate_throwException() {
-        Book book = new Book(0L, "Title", "Description", LocalDate.now());
+        final Book book = new Book(0L, "Title", "Description", LocalDate.now());
         assertThrows(SQLException.class,
                 () -> bookRepository.addBook(book, List.of(3532532L)));
     }
 
     @Test
     void updateBook_whenNormal_thenReturnUpdateBook() throws SQLException {
-        Book book = new Book(1L, "TitleName", "Description", LocalDate.now());
-        Book updateBook = bookRepository.updateBook(book);
+        final Book book = new Book(1L, "TitleName", "Description", LocalDate.now());
+        final Book updateBook = bookRepository.updateBook(book);
 
         assertThat(book, equalTo(updateBook));
     }
 
     @Test
     void updatetBook_whenTitleDuplicate_throwException() {
-        Book book = new Book(0L, "Title", "Description", LocalDate.now());
+        final Book book = new Book(0L, "Title", "Description", LocalDate.now());
         assertThrows(SQLException.class,
                 () -> bookRepository.updateBook(book));
     }
 
     @Test
     void deleteBook_whenNormal_thenDeleteBook() throws SQLException {
-        Book book1 = new Book(0L, "TitleSecond", "Description", LocalDate.now());
-        Book book3 = bookRepository.addBook(book1, List.of(1L));
+        final Book book1 = new Book(0L, "TitleSecond", "Description", LocalDate.now());
+        final Book book3 = bookRepository.addBook(book1, List.of(1L));
         bookRepository.deleteBook(book3.getId());
         assertThrows(IllegalArgumentException.class, () -> bookRepository.getBookById(book3.getId()));
     }
@@ -111,9 +111,9 @@ class BookRepositoreTest {
 
     @Test
     void getBookById_whenNormal_thenReturnBook() throws SQLException {
-        Book book = bookRepository.addBook(new Book(0L, "TS", "Description", LocalDate.now()),
+        final Book book = bookRepository.addBook(new Book(0L, "TS", "Description", LocalDate.now()),
                 List.of(1L));
-        Book getBook = bookRepository.getBookById(book.getId());
+        final Book getBook = bookRepository.getBookById(book.getId());
 
         assertThat(book, equalTo(getBook));
     }

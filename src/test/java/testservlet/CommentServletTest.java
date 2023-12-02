@@ -21,19 +21,19 @@ import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServletTest {
-    Gson gson = new Gson();
+    private Gson gson = new Gson();
     @InjectMocks
-    CommentServlet commentServlet;
+    private CommentServlet commentServlet;
     @Mock
-    CommentService commentService;
+    private CommentService commentService;
     @Mock
-    HttpServletResponse response;
+    private HttpServletResponse response;
     @Mock
-    HttpServletRequest request;
+    private HttpServletRequest request;
 
     @Test
     void doPost_whenNormal_returnCommentDto() throws IOException, SQLException {
-        final CommentDto commentDto = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
         final String responseBody = gson.toJson(commentDto);
         final long bookId = 1L;
 
@@ -62,7 +62,7 @@ class CommentServletTest {
 
     @Test
     void doPost_whenBookNotFound_throwIllegalArgumentException() throws IOException, SQLException {
-        final CommentDto commentDto = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
         final String responseBody = gson.toJson(commentDto);
         final long bookId = 1L;
 
@@ -90,7 +90,7 @@ class CommentServletTest {
 
     @Test
     void doPost_whenDatabaseError_throwSQLException() throws IOException, SQLException {
-        final CommentDto commentDto = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
         final String responseBody = gson.toJson(commentDto);
         final long bookId = 1L;
 
@@ -117,7 +117,7 @@ class CommentServletTest {
 
     @Test
     void updateComment_whenNormal_thenReturnAuthor() throws IOException, SQLException {
-        final CommentDto commentDto = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
         final String responseBody = gson.toJson(commentDto);
         final long commentId = 1L;
 
@@ -152,7 +152,7 @@ class CommentServletTest {
     @Test
     void updateComment_whenURIInvalid_thenErrorResponse() throws IOException, SQLException {
         final long commentId = 1;
-        final CommentDto commentDto = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
         final String responseBody = gson.toJson(commentDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
@@ -182,7 +182,7 @@ class CommentServletTest {
     @Test
     void updateComment_whenCommentNotFound_throwException() throws IOException, SQLException {
         final long commentId = 1;
-        final CommentDto commentDto = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
         final String responseBody = gson.toJson(commentDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
@@ -212,7 +212,7 @@ class CommentServletTest {
     @Test
     void updateComment_whenDatabaseError_throwSQLException() throws IOException, SQLException {
         final long commentId = 1;
-        final CommentDto commentDto = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
         final String responseBody = gson.toJson(commentDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
@@ -318,8 +318,8 @@ class CommentServletTest {
     @Test
     void getCommentsByBookId_whenNormal_thenReturnBooks() throws IOException, SQLException {
         final long bookId = 1;
-        final CommentDto commentDto = new CommentDto("Content");
-        final CommentDto commentDto1 = new CommentDto("Content1");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
+        final CommentDto commentDto1 = new CommentDto("Title", "Content1");
 
         String responseBody = gson.toJson(List.of(commentDto, commentDto1));
         Mockito

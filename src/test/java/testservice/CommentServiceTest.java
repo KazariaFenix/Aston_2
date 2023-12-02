@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.marzuev.model.Book;
 import ru.marzuev.model.Comment;
 import ru.marzuev.model.dto.CommentDto;
 import ru.marzuev.repository.BookRepository;
@@ -13,6 +14,7 @@ import ru.marzuev.repository.CommentRepository;
 import ru.marzuev.service.impl.CommentServiceImpl;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -30,14 +32,18 @@ class CommentServiceTest {
 
     @Test
     void addComment_whenNormal_thenReturnComment() throws SQLException {
+        final Book book = new Book(1L, "Title", "Description", LocalDate.now());
         final Comment comment = new Comment(0, "Content");
         final Comment postComment = new Comment(1, "Content");
-        final CommentDto commentDto = new CommentDto("Content");
-        final CommentDto addComment = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
+        final CommentDto addComment = new CommentDto("Title", "Content");
         final long bookId = 1L;
         Mockito
                 .when(commentRepository.addComment(comment, bookId))
                 .thenReturn(postComment);
+        Mockito
+                .when(bookRepository.getBookById(bookId))
+                .thenReturn(book);
 
         CommentDto postCommentDto = commentService.addComment(commentDto, bookId);
         assertThat(addComment, equalTo(postCommentDto));
@@ -46,7 +52,7 @@ class CommentServiceTest {
 
     @Test
     void addComment_whenBookNotFound_thenThrowException() throws SQLException {
-        final CommentDto commentDto = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
         final long bookId = 1L;
         Mockito
                 .when(bookRepository.getBookById(bookId))
@@ -60,13 +66,19 @@ class CommentServiceTest {
 
     @Test
     void updateComment_whenNormal_thenReturnComment() throws SQLException {
+        final Book book = new Book(1L, "Title", "Description", LocalDate.now());
         final Comment comment = new Comment(1, "Content");
         final Comment updateComment = new Comment(1, "Content");
-        final CommentDto commentDto = new CommentDto("Content");
-        final CommentDto addComment = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
+        final CommentDto addComment = new CommentDto("Title", "Content");
+        comment.setBook(book);
+        updateComment.setBook(book);
         Mockito
                 .when(commentRepository.updateComment(comment, comment.getId()))
                 .thenReturn(updateComment);
+        Mockito
+                .when(commentRepository.getCommentById(comment.getId()))
+                .thenReturn(comment);
 
         CommentDto updateCommentDto = commentService.updateComment(commentDto, comment.getId());
         assertThat(addComment, equalTo(updateCommentDto));
@@ -76,7 +88,7 @@ class CommentServiceTest {
 
     @Test
     void updateComment_whenCommentNotFound_thenThrowException() throws SQLException {
-        final CommentDto commentDto = new CommentDto("Content");
+        final CommentDto commentDto = new CommentDto("Title", "Content");
         final long commentId = 1L;
         Mockito
                 .when(commentRepository.getCommentById(commentId))
@@ -112,9 +124,15 @@ class CommentServiceTest {
 
     @Test
     void getCommentsByBook_whenNormal_thenReturnComments() throws SQLException {
+        final Book book = new Book(1L, "Book", "Description", LocalDate.now());
         final long bookId = 1L;
         final Comment comment = new Comment(1, "Content");
         final Comment comment1 = new Comment(2, "Content");
+        comment.setBook(book);
+        comment1.setBook(book);
+        Mockito
+                .when(bookRepository.getBookById(bookId))
+                        .thenReturn(book);
         Mockito
                 .when(commentRepository.getCommentsByBookId(bookId))
                 .thenReturn(List.of(comment, comment1));

@@ -1,7 +1,6 @@
 package ru.marzuev.repository.impl;
 
 import ru.marzuev.db.ConnectionManager;
-import ru.marzuev.db.ConnectionManagerImpl;
 import ru.marzuev.model.Author;
 import ru.marzuev.model.Book;
 import ru.marzuev.repository.AuthorRepository;
@@ -23,134 +22,165 @@ public class AuthorRepositoryImpl implements AuthorRepository {
 
     @Override
     public Author addAuthor(Author author) throws SQLException {
-        Connection connection = connectionManager.getConnection();
-        PreparedStatement ps = connection.prepareStatement("INSERT INTO authors (name, date_born) VALUES ( ?, ? )",
-                Statement.RETURN_GENERATED_KEYS);
-
-        ps.setString(1, author.getName());
-        ps.setDate(2, Date.valueOf(author.getDateBorn()));
-        int count = ps.executeUpdate();
-
-        if (count == 0) {
-            throw new SQLException("Author Is Not Insert");
-        }
-        ResultSet rs = ps.getGeneratedKeys();
-        long authorId = 0;
-        while (rs.next()) {
-            authorId = rs.getLong("author_id");
-        }
-        ps.close();
-
-        PreparedStatement ps1 = connection.prepareStatement("SELECT * FROM authors WHERE author_id = ?");
-
-        ps1.setLong(1, authorId);
         Author newAuthor = null;
+        List<Book> books = new ArrayList<>();
+        try (Connection connection = connectionManager.getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO authors (name, date_born) " +
+                    "VALUES ( ?, ? )", Statement.RETURN_GENERATED_KEYS);
 
-        try (ResultSet authorResult = ps1.executeQuery()) {
-            while (authorResult.next()) {
-                newAuthor = makeAuthor(authorResult);
+            ps.setString(1, author.getName());
+            ps.setDate(2, Date.valueOf(author.getDateBorn()));
+            int count = ps.executeUpdate();
+
+            if (count == 0) {
+                throw new SQLException("Author Is Not Insert");
+            }
+            ResultSet rs = ps.getGeneratedKeys();
+            long authorId = 0;
+            while (rs.next()) {
+                authorId = rs.getLong("author_id");
+            }
+            ps.close();
+
+            PreparedStatement ps1 = connection.prepareStatement("SELECT * FROM authors WHERE author_id = ?");
+
+            ps1.setLong(1, authorId);
+
+            try (ResultSet authorResult = ps1.executeQuery()) {
+                while (authorResult.next()) {
+                    newAuthor = makeAuthor(authorResult);
+                }
             }
         }
-        connection.close();
+        newAuthor.setListBooks(books);
 
         return newAuthor;
     }
 
     @Override
     public Author updateAuthor(Author author) throws SQLException {
-        Connection connection = connectionManager.getConnection();
-        PreparedStatement ps = connection.prepareStatement("UPDATE authors SET name = ?, date_born = ? " +
-                "WHERE author_id = ?");
-
-        ps.setString(1, author.getName());
-        ps.setDate(2, Date.valueOf(author.getDateBorn()));
-        ps.setLong(3, author.getId());
-        int count = ps.executeUpdate();
-
-        if (count == 0) {
-            throw new SQLException("Author Is Not Update");
-        }
-        ps.close();
-
-        PreparedStatement ps1 = connection.prepareStatement("SELECT * FROM authors WHERE author_id = ?");
-
-        ps1.setLong(1, author.getId());
         Author newAuthor = null;
+        List<Book> books = new ArrayList<>();
 
-        try (ResultSet authorResult = ps1.executeQuery()) {
-            while (authorResult.next()) {
-                newAuthor = makeAuthor(authorResult);
+        try (Connection connection = connectionManager.getConnection()) {
+            PreparedStatement ps = connection.prepareStatement("UPDATE authors SET name = ?, date_born = ? " +
+                    "WHERE author_id = ?");
+
+            ps.setString(1, author.getName());
+            ps.setDate(2, Date.valueOf(author.getDateBorn()));
+            ps.setLong(3, author.getId());
+            int count = ps.executeUpdate();
+
+            if (count == 0) {
+                throw new SQLException("Author Is Not Update");
             }
+            ps.close();
+            PreparedStatement ps1 = connection.prepareStatement("SELECT * FROM authors WHERE author_id = ?");
+
+            ps1.setLong(1, author.getId());
+            try (ResultSet authorResult = ps1.executeQuery()) {
+                while (authorResult.next()) {
+                    newAuthor = makeAuthor(authorResult);
+                }
+            }
+            ps1.close();
+            PreparedStatement ps2 = connection.prepareStatement("SELECT * FROM books WHERE book_id IN (" +
+                    "SELECT ab.book_id FROM authors_books AS ab WHERE author_id = ?)");
+
+            ps2.setLong(1, author.getId());
+            try (ResultSet booksResult = ps2.executeQuery()) {
+                while (booksResult.next()) {
+                    books.add(makeBook(booksResult));
+                }
+            }
+            newAuthor.setListBooks(books);
         }
-        connection.close();
 
         return newAuthor;
     }
 
     @Override
     public void deleteAuthor(long authorId) throws SQLException {
-        Connection connection = connectionManager.getConnection();
-        PreparedStatement ps = connection.prepareStatement("DELETE FROM authors WHERE author_id = ?");
+        try (Connection connection = connectionManager.getConnection()) {
+            PreparedStatement ps1 = connection.prepareStatement("DELETE FROM books WHERE book_id IN (" +
+                    "SELECT book_id FROM authors_books WHERE author_id = ?)");
 
-        ps.setLong(1, authorId);
-        int count = ps.executeUpdate();
+            ps1.setLong(1, authorId);
+            ps1.executeUpdate();
+            ps1.close();
 
-        if (count == 0) {
-            throw new IllegalArgumentException("Author Is Not Delete");
+            PreparedStatement ps2 = connection.prepareStatement("DELETE FROM authors WHERE author_id = ?");
+
+            ps2.setLong(1, authorId);
+            int count = ps2.executeUpdate();
+
+            if (count == 0) {
+                throw new SQLException("Author Is Not Delete");
+            }
+            ps2.close();
+
+
         }
-        ps.close();
-
-        PreparedStatement ps1 = connection.prepareStatement("DELETE FROM authors_books WHERE author_id = ?");
-
-        ps1.setLong(1, authorId);
-        ps1.executeUpdate();
-        ps1.close();
-        connection.close();
     }
 
     @Override
     public Author getAuthorById(long authorId) throws SQLException {
-        Connection connection = connectionManager.getConnection();
-        PreparedStatement statement = connection.prepareStatement("SELECT * FROM authors WHERE author_id = ?");
-
-        statement.setLong(1, authorId);
         Author findAuthor = null;
-        try (ResultSet results = statement.executeQuery()) {
-            while (results.next()) {
-                findAuthor = makeAuthor(results);
+        List<Book> books = new ArrayList<>();
+        try (Connection connection = connectionManager.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM authors WHERE author_id = ?");
+
+            statement.setLong(1, authorId);
+            try (ResultSet results = statement.executeQuery()) {
+                while (results.next()) {
+                    findAuthor = makeAuthor(results);
+                }
+            }
+            PreparedStatement ps2 = connection.prepareStatement("SELECT * FROM books WHERE book_id IN (" +
+                    "SELECT ab.book_id FROM authors_books AS ab WHERE author_id = ?)");
+
+            ps2.setLong(1, authorId);
+            try (ResultSet booksResult = ps2.executeQuery()) {
+                while (booksResult.next()) {
+                    books.add(makeBook(booksResult));
+                }
             }
         }
-        connection.close();
         if (findAuthor == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Author Not Found");
         } else {
+            findAuthor.setListBooks(books);
             return findAuthor;
         }
     }
 
     @Override
     public Map<Author, List<Book>> getAuthorsWithBooks() throws SQLException {
-        Connection connection = connectionManager.getConnection();
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM authors AS a LEFT JOIN authors_books AS ab " +
-                "ON a.author_id = ab.author_id LEFT JOIN books AS b ON ab.book_id = b.book_id ORDER BY a.author_id");
         Map<Author, List<Book>> authorWithBook = new HashMap<>();
+        try (Connection connection = connectionManager.getConnection()) {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM authors AS a LEFT JOIN authors_books AS ab " +
+                    "ON a.author_id = ab.author_id LEFT JOIN books AS b ON ab.book_id = b.book_id ORDER BY a.author_id");
 
-        while (resultSet.next()) {
-            Author author = makeAuthor(resultSet);
-            Book book = null;
-            if (resultSet.getString("book_id") != null) {
-                book = makeBook(resultSet);
-            }
-            List<Book> booksByAuthor = new ArrayList<>();
-            if (authorWithBook.containsKey(author.getId())) {
-                authorWithBook.get(author.getId()).add(book);
-            } else {
-                booksByAuthor.add(book);
-                authorWithBook.put(author, booksByAuthor);
+            while (resultSet.next()) {
+                Author author = makeAuthor(resultSet);
+                Book book = null;
+                if (resultSet.getString("book_id") != null) {
+                    book = makeBook(resultSet);
+                }
+                List<Book> booksByAuthor = new ArrayList<>();
+                if (book == null) {
+                    authorWithBook.put(author, booksByAuthor);
+                    continue;
+                }
+                if (authorWithBook.containsKey(author)) {
+                    authorWithBook.get(author).add(book);
+                } else {
+                    booksByAuthor.add(book);
+                    authorWithBook.put(author, booksByAuthor);
+                }
             }
         }
-        connection.close();
 
         return authorWithBook;
     }

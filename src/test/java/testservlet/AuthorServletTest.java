@@ -22,15 +22,15 @@ import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorServletTest {
-    Gson gson = new Gson();
+    private Gson gson = new Gson();
     @InjectMocks
-    AuthorServlet authorServlet;
+    private AuthorServlet authorServlet;
     @Mock
-    AuthorService authorService;
+    private AuthorService authorService;
     @Mock
-    HttpServletResponse response;
+    private HttpServletResponse response;
     @Mock
-    HttpServletRequest request;
+    private HttpServletRequest request;
 
     @Test
     void doPost_whenNormal_returnAuthorDto() throws IOException, SQLException {

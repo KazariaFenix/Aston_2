@@ -37,9 +37,9 @@ class AuthorServiceTest {
 
     @Test
     void addAuthor_whenNormal_thenReturnAuthor() throws SQLException {
-        AuthorDto authorDto = new AuthorDto("Bob", LocalDate.of(1990, 10,28),
+        final AuthorDto authorDto = new AuthorDto("Bob", LocalDate.of(1990, 10,28),
                 new ArrayList<>());
-        Author author = new Author(0L, "Bob", LocalDate.of(1990, 10,28));
+        final Author author = new Author(0L, "Bob", LocalDate.of(1990, 10,28));
 
         Mockito
                 .when(authorRepository.addAuthor(author))
@@ -53,9 +53,9 @@ class AuthorServiceTest {
 
     @Test
     void addUser_whenInvalidName_thenReturnSqlException() throws SQLException {
-        AuthorDto authorDto = new AuthorDto("Bob", LocalDate.of(1990, 10,28),
+        final AuthorDto authorDto = new AuthorDto("Bob", LocalDate.of(1990, 10,28),
                 new ArrayList<>());
-        Author author = new Author(0L, "Bob", LocalDate.of(1990, 10,28));
+        final Author author = new Author(0L, "Bob", LocalDate.of(1990, 10,28));
 
         Mockito
                 .when(authorRepository.addAuthor(author))
@@ -70,9 +70,9 @@ class AuthorServiceTest {
 
     @Test
     void updateAuthor_whenNormal_thenReturnUpdateAuthor() throws SQLException {
-        AuthorDto authorDto = new AuthorDto("UpdateBob", LocalDate.of(1990, 10,28),
+        final AuthorDto authorDto = new AuthorDto("UpdateBob", LocalDate.of(1990, 10,28),
                 new ArrayList<>());
-        Author newAuthor = new Author(1L, "UpdateBob", LocalDate.of(1990, 10,28));
+        final Author newAuthor = new Author(1L, "UpdateBob", LocalDate.of(1990, 10,28));
 
         Mockito
                 .when(authorRepository.updateAuthor(newAuthor))
@@ -85,9 +85,9 @@ class AuthorServiceTest {
 
     @Test
     void updateAuthor_whenNotFoundAuthor_thenReturnUpdateAuthor() throws SQLException {
-        AuthorDto authorDto = new AuthorDto("UpdateBob", LocalDate.of(1990, 10,28),
+        final AuthorDto authorDto = new AuthorDto("UpdateBob", LocalDate.of(1990, 10,28),
                 new ArrayList<>());
-        Author author = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
+        final Author author = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
 
         Mockito
                 .when(authorRepository.getAuthorById(author.getId()))
@@ -101,9 +101,9 @@ class AuthorServiceTest {
 
     @Test
     void updateAuthor_whenInvalidName_thenReturnUpdateAuthor() throws SQLException {
-        AuthorDto authorDto = new AuthorDto("UpdateBob", LocalDate.of(1990, 10,28),
+        final AuthorDto authorDto = new AuthorDto("UpdateBob", LocalDate.of(1990, 10,28),
                 new ArrayList<>());
-        Author newAuthor = new Author(1L, "UpdateBob", LocalDate.of(1990, 10,28));
+        final Author newAuthor = new Author(1L, "UpdateBob", LocalDate.of(1990, 10,28));
 
         Mockito
                 .when(authorRepository.updateAuthor(newAuthor))
@@ -117,7 +117,7 @@ class AuthorServiceTest {
 
     @Test
     void deleteAuthor_whenNormal_thenDeleteAuthor() throws SQLException {
-        Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
+        final Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
 
         Mockito
                 .doNothing()
@@ -128,7 +128,7 @@ class AuthorServiceTest {
 
     @Test
     void deleteAuthor_whenNotFoundAuthor_thenDeleteAuthor() throws SQLException {
-        Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
+        final Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
 
         Mockito
                 .doThrow(new SQLException("Author Not Found"))
@@ -142,9 +142,9 @@ class AuthorServiceTest {
 
     @Test
     void getAuthorById_whenNormal_thenReturnAuthor() throws SQLException {
-        AuthorDto authorDto = new AuthorDto("Bob", LocalDate.of(1990, 10,28),
+        final AuthorDto authorDto = new AuthorDto("Bob", LocalDate.of(1990, 10,28),
                 new ArrayList<>());
-        Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
+        final Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
 
         Mockito
                 .when(authorRepository.getAuthorById(newAuthor.getId()))
@@ -157,15 +157,13 @@ class AuthorServiceTest {
 
     @Test
     void getAuthorById_whenNormalWithBooks_thenReturnAuthor() throws SQLException {
-        AuthorDto authorDto = new AuthorDto("Bob", LocalDate.of(1990, 10,28),
-                new ArrayList<>(List.of("Book0", "Book1")));
-        Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
-        Book book0 = new Book(1L, "Book0", "Description0", LocalDate.now());
-        Book book1 = new Book(2l, "Book1", "Description1", LocalDate.now());
+        final AuthorDto authorDto = new AuthorDto("Bob", LocalDate.of(1990, 10,28),
+                List.of("Book0", "Book1"));
+        final Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
+        final Book book0 = new Book(1L, "Book0", "Description0", LocalDate.now());
+        final Book book1 = new Book(2l, "Book1", "Description1", LocalDate.now());
+        newAuthor.setListBooks(List.of(book0, book1));
 
-        Mockito
-                .when(bookRepository.getBooksByAuthorId(newAuthor.getId()))
-                .thenReturn(new ArrayList<>(List.of(book0, book1)));
         Mockito
                 .when(authorRepository.getAuthorById(newAuthor.getId()))
                 .thenReturn(newAuthor);
@@ -173,12 +171,11 @@ class AuthorServiceTest {
         AuthorDto author = authorService.getAuthorById(newAuthor.getId());
         assertThat(author, equalTo(authorDto));
         Mockito.verify(authorRepository, Mockito.times(1)).getAuthorById(newAuthor.getId());
-        Mockito.verify(bookRepository, Mockito.times(1)).getBooksByAuthorId(newAuthor.getId());
     }
 
     @Test
     void getAuthorById_whenNotFoundAuthor_thenReturnAuthor() throws SQLException {
-        Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
+        final Author newAuthor = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
 
         Mockito
                 .when(authorRepository.getAuthorById(newAuthor.getId()))
@@ -193,8 +190,8 @@ class AuthorServiceTest {
 
     @Test
     void getAuthors_whenNormal_thenReturnAuthor() throws SQLException {
-        Author newAuthor1 = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
-        Author newAuthor = new Author(2L, "Alex", LocalDate.of(1990, 10,28));
+        final Author newAuthor1 = new Author(1L, "Bob", LocalDate.of(1990, 10,28));
+        final Author newAuthor = new Author(2L, "Alex", LocalDate.of(1990, 10,28));
 
         Mockito
                 .when(authorRepository.getAuthorsWithBooks())

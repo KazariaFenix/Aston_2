@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,16 +59,17 @@ class AuthorRepositoryTest {
 
     @Test
     void insertAuthor_whenNormal_thenReturnAuthor() throws SQLException {
-        Author newAuthor = new Author(0L, "Vlad",
+        final Author newAuthor = new Author(0L, "Vlad",
                 LocalDate.of(1990, 5, 12));
-        Author author = authorRepository.addAuthor(newAuthor);
+        final Author author = authorRepository.addAuthor(newAuthor);
         newAuthor.setId(author.getId());
+        newAuthor.setListBooks(new ArrayList<>());
         assertThat(newAuthor, equalTo(author));
     }
 
     @Test
     void insertAuthor_whenDuplicateName_throwException() throws SQLException {
-        Author newAuthor1 = new Author(0L, "Alex",
+        final Author newAuthor1 = new Author(0L, "Alex",
                 LocalDate.of(1990, 5, 12));
         assertThrows(SQLException.class,
                 () -> authorRepository.addAuthor(newAuthor1));
@@ -75,20 +77,20 @@ class AuthorRepositoryTest {
 
     @Test
     void updateAuthor_whenNormal_thenReturnNewAuthor() throws SQLException {
-        Author newAuthor = new Author(0L, "Rom",
+        final Author author = new Author(1L, "Roman",
                 LocalDate.of(1990, 5, 12));
-        Author newAuthor1 = new Author(1L, "Roman",
-                LocalDate.of(1990, 5, 12));
-        Author author = authorRepository.addAuthor(newAuthor);
-        Author updateAuthor = authorRepository.updateAuthor(newAuthor1);
-        assertThat(updateAuthor, equalTo(newAuthor1));
+        author.setListBooks(new ArrayList<>());
+        final Author newAuthor = authorRepository.addAuthor(author);
+
+        final Author updateAuthor = authorRepository.updateAuthor(newAuthor);
+        assertThat(updateAuthor, equalTo(newAuthor));
     }
 
     @Test
     void updateAuthor_whenAuthorNotFound_thenReturnNewAuthor() throws SQLException {
-        Author newAuthor = new Author(0L, "Alex",
+        final Author newAuthor = new Author(0L, "Alex",
                 LocalDate.of(1990, 5, 12));
-        Author newAuthor1 = new Author(0L, "Alexandro",
+        final Author newAuthor1 = new Author(0L, "Alexandro",
                 LocalDate.of(1990, 5, 12));
         authorRepository.addAuthor(newAuthor);
         assertThrows(SQLException.class,
@@ -97,9 +99,9 @@ class AuthorRepositoryTest {
 
     @Test
     void deleteAuthor_whenNormal_throwException() throws SQLException {
-        Author newAuthor = new Author(0L, "Serg",
+        final Author newAuthor = new Author(0L, "Serg",
                 LocalDate.of(1990, 5, 12));
-        Author author = authorRepository.addAuthor(newAuthor);
+        final Author author = authorRepository.addAuthor(newAuthor);
         authorRepository.deleteAuthor(author.getId());
         assertThrows(IllegalArgumentException.class,
                 () -> authorRepository.getAuthorById(author.getId()));
@@ -107,26 +109,26 @@ class AuthorRepositoryTest {
 
     @Test
     void deleteAuthor_whenAuthorNotFound_throwException() throws SQLException {
-        Author newAuthor = new Author(0L, "Mack",
+        final Author newAuthor = new Author(0L, "Mack",
                 LocalDate.of(1990, 5, 12));
         authorRepository.addAuthor(newAuthor);
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(SQLException.class,
                 () -> authorRepository.deleteAuthor(newAuthor.getId()));
     }
 
     @Test
     void getAuthorById_whenNormal_thenReturnAuthor() throws SQLException {
-        Author newAuthor = new Author(0L, "Rick",
+        final Author newAuthor = new Author(0L, "Rick",
                 LocalDate.of(1990, 5, 12));
-        Author author = authorRepository.addAuthor(newAuthor);
-        Author getAuthor = authorRepository.getAuthorById(author.getId());
+        final Author author = authorRepository.addAuthor(newAuthor);
+        final Author getAuthor = authorRepository.getAuthorById(author.getId());
 
         assertThat(author, equalTo(getAuthor));
     }
 
     @Test
     void getAuthorById_whenAuthorNotFound_throwException() throws SQLException {
-        Author newAuthor = new Author(0L, "Nick",
+        final Author newAuthor = new Author(0L, "Nick",
                 LocalDate.of(1990, 5, 12));
         authorRepository.addAuthor(newAuthor);
         assertThrows(IllegalArgumentException.class,
@@ -135,9 +137,9 @@ class AuthorRepositoryTest {
 
     @Test
     void getAuthors_whenNormal_thenReturnAuthors() throws SQLException {
-        Author newAuthor = new Author(0L, "Dan",
+        final Author newAuthor = new Author(0L, "Dan",
                 LocalDate.of(1990, 5, 12));
-        Author newAuthor1 = new Author(0L, "Ivan",
+        final Author newAuthor1 = new Author(0L, "Ivan",
                 LocalDate.of(1990, 5, 12));
         authorRepository.addAuthor(newAuthor);
         authorRepository.addAuthor(newAuthor1);

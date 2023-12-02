@@ -6,8 +6,6 @@ import ru.marzuev.model.dto.AuthorDto;
 import ru.marzuev.model.mapper.AuthorMapper;
 import ru.marzuev.repository.AuthorRepository;
 import ru.marzuev.repository.BookRepository;
-import ru.marzuev.repository.impl.AuthorRepositoryImpl;
-import ru.marzuev.repository.impl.BookRepositoryImpl;
 import ru.marzuev.service.AuthorService;
 
 import java.sql.SQLException;
@@ -28,15 +26,16 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public AuthorDto addAuthor(AuthorDto authorDto) throws SQLException {
         Author author = AuthorMapper.toAuthor(0, authorDto);
-        return AuthorMapper.toAuthorDto(repository.addAuthor(author), null);
+
+        return AuthorMapper.toAuthorDto(repository.addAuthor(author));
     }
 
     @Override
     public AuthorDto updateAuthor(AuthorDto authorDto, long authorId) throws SQLException {
         repository.getAuthorById(authorId);
-        Author author = AuthorMapper.toAuthor(authorId, authorDto);
-        List<Book> authorsBook = bookRepository.getBooksByAuthorId(author.getId());
-        return AuthorMapper.toAuthorDto(repository.updateAuthor(author), authorsBook);
+        Author author = repository.updateAuthor(AuthorMapper.toAuthor(authorId, authorDto));
+
+        return AuthorMapper.toAuthorDto(author);
     }
 
     @Override
@@ -47,15 +46,17 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public AuthorDto getAuthorById(long authorId) throws SQLException {
-        List<Book> authorsBook = bookRepository.getBooksByAuthorId(authorId);
-        return AuthorMapper.toAuthorDto(repository.getAuthorById(authorId), authorsBook);
+        Author author = repository.getAuthorById(authorId);
+
+        return AuthorMapper.toAuthorDto(author);
     }
 
     @Override
     public List<AuthorDto> getAuthors() throws SQLException {
         Map<Author, List<Book>> authorWiyhBooks = repository.getAuthorsWithBooks();
         return authorWiyhBooks.entrySet().stream()
-                .map(entry -> AuthorMapper.toAuthorDto(entry.getKey(), entry.getValue()))
+                .peek(entry -> entry.getKey().setListBooks(entry.getValue()))
+                .map(entry -> AuthorMapper.toAuthorDto(entry.getKey()))
                 .collect(Collectors.toList());
     }
 }

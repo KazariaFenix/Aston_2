@@ -16,7 +16,7 @@ public interface BookRepository {
 
     Book getBookById(long bookId) throws SQLException;
 
-    List<Long> findAuthorByBookId(long bookId) throws SQLException;
+    List<Author> findAuthorByBookId(long bookId) throws SQLException;
 
     List<Book> getBooksByAuthorId(long authorId) throws SQLException;
 }

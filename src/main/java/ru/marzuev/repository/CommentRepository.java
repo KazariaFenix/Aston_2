@@ -4,6 +4,7 @@ import ru.marzuev.model.Comment;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public interface CommentRepository {
 
@@ -16,4 +17,6 @@ public interface CommentRepository {
     Comment getCommentById(long commentId) throws SQLException;
 
     List<Comment> getCommentsByBookId(long bookId) throws SQLException;
+
+    Map<Long, List<Comment>> getCommentByBookByAuthorId(long authorId) throws SQLException;
 }

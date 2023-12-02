@@ -6,7 +6,6 @@ public class Comment {
     private long id;
     private String content;
     private Book book;
-    private Author author;
 
     public Comment(long id, String content) {
         this.id = id;
@@ -33,25 +32,17 @@ public class Comment {
         this.book = book;
     }
 
-    public Author getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(Author author) {
-        this.author = author;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Comment comment = (Comment) o;
-        return id == comment.id && Objects.equals(content, comment.content) && Objects.equals(book, comment.book) && Objects.equals(author, comment.author);
+        return id == comment.id && Objects.equals(content, comment.content) && Objects.equals(book, comment.book);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, content, book, author);
+        return Objects.hash(id, content, book);
     }
 
     @Override
@@ -60,7 +51,6 @@ public class Comment {
                 "id=" + id +
                 ", content='" + content + '\'' +
                 ", book=" + book +
-                ", author=" + author +
                 '}';
     }
 }

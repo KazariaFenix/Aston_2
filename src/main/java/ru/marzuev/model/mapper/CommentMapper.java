@@ -6,7 +6,7 @@ import ru.marzuev.model.dto.CommentDto;
 public class CommentMapper {
 
     public static CommentDto toCommentDto(Comment comment) {
-        return new CommentDto(comment.getContent());
+        return new CommentDto(comment.getBook().getTitle(), comment.getContent());
     }
 
     public static Comment toComment(CommentDto commentDto, long commentId) {
