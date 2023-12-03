@@ -8,8 +8,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.marzuev.db.ConnectionManager;
-import ru.marzuev.db.ConnectionManagerTest;
-import ru.marzuev.db.InitDatabaseImpl;
+import ru.marzuev.db.ConnectionManagerImpl;
 import ru.marzuev.model.Author;
 import ru.marzuev.model.Book;
 import ru.marzuev.repository.AuthorRepository;
@@ -33,7 +32,8 @@ class BookRepositoreTest {
     protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
             .withDatabaseName("litTest")
             .withUsername("login")
-            .withPassword("pass");
+            .withPassword("pass")
+            .withInitScript("schema.sql");
     BookRepository bookRepository;
     AuthorRepository authorRepository;
 
@@ -48,18 +48,14 @@ class BookRepositoreTest {
     }
 
     @BeforeEach
-    void setUp() throws SQLException {
-        ConnectionManager connectionManager = new ConnectionManagerTest(
+    void setUp() {
+        ConnectionManager connectionManager = new ConnectionManagerImpl(
                 postgres.getJdbcUrl(),
                 postgres.getUsername(),
                 postgres.getPassword()
         );
         bookRepository = new BookRepositoryImpl(connectionManager);
         authorRepository = new AuthorRepositoryImpl(connectionManager);
-        try (Connection connection = connectionManager.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(InitDatabaseImpl.createTable());
-            ps.execute();
-        }
     }
 
     @Test
@@ -133,5 +129,12 @@ class BookRepositoreTest {
         List<Book> books = bookRepository.getBooksByAuthorId(1L);
 
         assertThat(books.size(), equalTo(3));
+    }
+
+    @Test
+    void findAuthorByBookId_whenNormal_thenReturnBooks() throws SQLException {
+        final List<Author> booksByAuthor = bookRepository.findAuthorByBookId(1L);
+
+        assertThat(booksByAuthor.size(), equalTo(1));
     }
 }

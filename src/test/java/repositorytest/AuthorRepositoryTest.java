@@ -5,15 +5,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.marzuev.db.ConnectionManager;
-import ru.marzuev.db.ConnectionManagerTest;
-import ru.marzuev.db.InitDatabaseImpl;
+import ru.marzuev.db.ConnectionManagerImpl;
 import ru.marzuev.model.Author;
 import ru.marzuev.model.Book;
 import ru.marzuev.repository.AuthorRepository;
 import ru.marzuev.repository.impl.AuthorRepositoryImpl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,7 +27,8 @@ class AuthorRepositoryTest {
     protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:latest")
             .withDatabaseName("litTest")
             .withUsername("login")
-            .withPassword("pass");
+            .withPassword("pass")
+            .withInitScript("schema.sql");
     AuthorRepository authorRepository;
 
     @BeforeAll
@@ -44,17 +42,13 @@ class AuthorRepositoryTest {
     }
 
     @BeforeEach
-    void setUp() throws SQLException {
-        ConnectionManager connectionManager = new ConnectionManagerTest(
+    void setUp() {
+        ConnectionManager connectionManager = new ConnectionManagerImpl(
                 postgres.getJdbcUrl(),
                 postgres.getUsername(),
                 postgres.getPassword()
         );
         authorRepository = new AuthorRepositoryImpl(connectionManager);
-        try (Connection connection = connectionManager.getConnection()) {
-            PreparedStatement ps = connection.prepareStatement(InitDatabaseImpl.createTable());
-            ps.execute();
-        }
     }
 
     @Test
@@ -130,6 +124,7 @@ class AuthorRepositoryTest {
     void getAuthorById_whenAuthorNotFound_throwException() throws SQLException {
         final Author newAuthor = new Author(0L, "Nick",
                 LocalDate.of(1990, 5, 12));
+
         authorRepository.addAuthor(newAuthor);
         assertThrows(IllegalArgumentException.class,
                 () -> authorRepository.getAuthorById(newAuthor.getId()));
@@ -141,9 +136,11 @@ class AuthorRepositoryTest {
                 LocalDate.of(1990, 5, 12));
         final Author newAuthor1 = new Author(0L, "Ivan",
                 LocalDate.of(1990, 5, 12));
+
         authorRepository.addAuthor(newAuthor);
         authorRepository.addAuthor(newAuthor1);
-        Map<Author, List<Book>> authors = authorRepository.getAuthorsWithBooks();
+        final Map<Author, List<Book>> authors = authorRepository.getAuthorsWithBooks();
+
         assertThat(authors.size(), equalTo(5));
     }
 }

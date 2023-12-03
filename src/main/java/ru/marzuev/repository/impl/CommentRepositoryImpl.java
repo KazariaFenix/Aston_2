@@ -123,7 +123,7 @@ public class CommentRepositoryImpl implements CommentRepository {
             }
         }
         if (findComment == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Comment Not Found");
         } else {
             findComment.setBook(book);
             return findComment;
