@@ -11,6 +11,9 @@ public class BookDto {
     private List<Long> authors;
     private List<CommentDto> comments;
 
+    public BookDto() {
+    }
+
     public BookDto(String title, String description, LocalDate release, List<Long> authors,
                    List<CommentDto> comments) {
         this.title = title;
@@ -20,26 +23,28 @@ public class BookDto {
         this.comments = comments;
     }
 
-    public BookDto(String title, String description, LocalDate release) {
-        this.title = title;
-        this.description = description;
-        this.release = release;
-    }
-
     public String getTitle() {
         return title;
     }
 
-    public String getdescription() {
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public LocalDate getRelease() {
         return release;
     }
 
-    public List<CommentDto> getComments() {
-        return comments;
+    public void setRelease(LocalDate release) {
+        this.release = release;
     }
 
     public List<Long> getAuthors() {
@@ -48,6 +53,10 @@ public class BookDto {
 
     public void setAuthors(List<Long> authors) {
         this.authors = authors;
+    }
+
+    public List<CommentDto> getComments() {
+        return comments;
     }
 
     public void setComments(List<CommentDto> comments) {

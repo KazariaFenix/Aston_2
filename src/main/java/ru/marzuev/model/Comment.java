@@ -12,6 +12,12 @@ public class Comment {
         this.content = content;
     }
 
+    public Comment(long id, String content, Book book) {
+        this.id = id;
+        this.content = content;
+        this.book = book;
+    }
+
     public long getId() {
         return id;
     }
@@ -22,6 +28,10 @@ public class Comment {
 
     public String getContent() {
         return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public Book getBook() {

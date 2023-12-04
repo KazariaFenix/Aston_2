@@ -1,6 +1,6 @@
 package ru.marzuev.servlet;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.marzuev.db.ConnectionManagerImpl;
 import ru.marzuev.model.dto.BookDto;
 import ru.marzuev.repository.impl.AuthorRepositoryImpl;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BookServlet extends HttpServlet {
-    private final Gson gson = new Gson();
+    private ObjectMapper om = new ObjectMapper().findAndRegisterModules();
     private BookService bookService = new BookServiceImpl(new BookRepositoryImpl(new ConnectionManagerImpl()),
             new AuthorRepositoryImpl(new ConnectionManagerImpl()),
             new CommentRepositoryImpl(new ConnectionManagerImpl()));
@@ -32,13 +32,13 @@ public class BookServlet extends HttpServlet {
             if (!request.getServletPath().equals(request.getRequestURI())) {
                 int index = request.getRequestURI().lastIndexOf("/");
                 long bookId = Long.parseLong(request.getRequestURI().substring(index + 1));
-                responseBody = gson.toJson(bookService.getBookById(bookId));
+                responseBody = om.writeValueAsString(bookService.getBookById(bookId));
                 response.getWriter().println(responseBody);
                 return;
             }
             if (request.getParameter("author") != null) {
                 long authorId = Long.parseLong(request.getParameter("author"));
-                responseBody = gson.toJson(bookService.getBooksByAuthorId(authorId));
+                responseBody = om.writeValueAsString(bookService.getBooksByAuthorId(authorId));
                 response.getWriter().println(responseBody);
             } else {
                 response.sendError(406, "Insert Author Id Or Book Id");
@@ -63,8 +63,8 @@ public class BookServlet extends HttpServlet {
             List<Long> authorsList = Arrays.stream(authorsId)
                     .map(authorId -> Long.parseLong(authorId))
                     .collect(Collectors.toList());
-            bookDto = gson.fromJson(requestBody.toString(), BookDto.class);
-            String responseBody = gson.toJson(bookService.addBook(bookDto, authorsList));
+            bookDto = om.readValue(requestBody.toString(), BookDto.class);
+            String responseBody = om.writeValueAsString(bookService.addBook(bookDto, authorsList));
             response.getWriter().println(responseBody);
         } catch (IllegalArgumentException e) {
             response.sendError(409, "Author Not Found");
@@ -85,8 +85,8 @@ public class BookServlet extends HttpServlet {
             if (!request.getServletPath().equals(request.getRequestURI())) {
                 int lastIndex = request.getRequestURI().lastIndexOf("/");
                 long bookId = Long.parseLong(request.getRequestURI().substring(lastIndex + 1));
-                bookDto = gson.fromJson(requestBody.toString(), BookDto.class);
-                responseBody = gson.toJson(bookService.updateBook(bookDto, bookId));
+                bookDto = om.readValue(requestBody.toString(), BookDto.class);
+                responseBody = om.writeValueAsString(bookService.updateBook(bookDto, bookId));
                 response.getWriter().println(responseBody);
             } else {
                 response.sendError(406, "Book Id Invalid");

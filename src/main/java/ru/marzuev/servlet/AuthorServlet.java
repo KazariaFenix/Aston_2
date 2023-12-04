@@ -1,6 +1,6 @@
 package ru.marzuev.servlet;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.marzuev.db.ConnectionManagerImpl;
 import ru.marzuev.model.dto.AuthorDto;
 import ru.marzuev.repository.impl.AuthorRepositoryImpl;
@@ -19,7 +19,7 @@ public class AuthorServlet extends HttpServlet {
 
     private AuthorService authorService = new AuthorServiceImpl(new AuthorRepositoryImpl(new ConnectionManagerImpl()),
             new BookRepositoryImpl(new ConnectionManagerImpl()));
-    private Gson gson = new Gson();
+    private ObjectMapper om = new ObjectMapper().findAndRegisterModules();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -28,10 +28,10 @@ public class AuthorServlet extends HttpServlet {
             if (!request.getServletPath().equals(request.getRequestURI())) {
                 int lastIndex = request.getRequestURI().lastIndexOf("/");
                 long authorId = Long.parseLong(request.getRequestURI().substring(lastIndex + 1));
-                responseBody = gson.toJson(authorService.getAuthorById(authorId));
+                responseBody = om.writeValueAsString(authorService.getAuthorById(authorId));
                 response.getWriter().println(responseBody);
             } else {
-                responseBody = gson.toJson(authorService.getAuthors());
+                responseBody = om.writeValueAsString(authorService.getAuthors());
                 response.getWriter().println(responseBody);
             }
         } catch (IllegalArgumentException e) {
@@ -49,8 +49,8 @@ public class AuthorServlet extends HttpServlet {
             if (bf.ready()) {
                 requestBody.append(bf.readLine());
             }
-            authorDto = gson.fromJson(requestBody.toString(), AuthorDto.class);
-            String responseBody = gson.toJson(authorService.addAuthor(authorDto));
+            authorDto = om.readValue(requestBody.toString(), AuthorDto.class);
+            String responseBody = om.writeValueAsString(authorService.addAuthor(authorDto));
             response.getWriter().println(responseBody);
         } catch (IllegalArgumentException e) {
             response.sendError(409, "Author Already Exists");
@@ -70,8 +70,8 @@ public class AuthorServlet extends HttpServlet {
             if (!request.getServletPath().equals(request.getRequestURI())) {
                 int lastIndex = request.getRequestURI().lastIndexOf("/");
                 long authorId = Long.parseLong(request.getRequestURI().substring(lastIndex + 1));
-                authorDto = gson.fromJson(requestBody.toString(), AuthorDto.class);
-                response.getWriter().println(gson.toJson(authorService.updateAuthor(authorDto,
+                authorDto = om.readValue(requestBody.toString(), AuthorDto.class);
+                response.getWriter().println(om.writeValueAsString(authorService.updateAuthor(authorDto,
                         authorId)));
             } else {
                 response.sendError(406, "Author Id Invalid");

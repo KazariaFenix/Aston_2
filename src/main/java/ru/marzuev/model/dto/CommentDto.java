@@ -7,9 +7,20 @@ public class CommentDto {
     private String titleBook;
     private String content;
 
+    public CommentDto() {
+    }
+
     public CommentDto(String titleBook, String content) {
         this.titleBook = titleBook;
         this.content = content;
+    }
+
+    public String getTitleBook() {
+        return titleBook;
+    }
+
+    public void setTitleBook(String titleBook) {
+        this.titleBook = titleBook;
     }
 
     public String getContent() {
@@ -19,15 +30,6 @@ public class CommentDto {
     public void setContent(String content) {
         this.content = content;
     }
-
-    public String getBook() {
-        return titleBook;
-    }
-
-    public void setBook(String titleBook) {
-        this.titleBook = titleBook;
-    }
-
 
     @Override
     public boolean equals(Object o) {

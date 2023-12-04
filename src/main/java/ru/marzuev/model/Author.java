@@ -18,11 +18,10 @@ public class Author {
         this.dateBorn = dateBorn;
     }
 
-    public List<Book> getListBooks() {
-        return listBooks;
-    }
-
-    public void setListBooks(List<Book> listBooks) {
+    public Author(long id, String name, LocalDate dateBorn, List<Book> listBooks) {
+        this.id = id;
+        this.name = name;
+        this.dateBorn = dateBorn;
         this.listBooks = listBooks;
     }
 
@@ -38,8 +37,24 @@ public class Author {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public LocalDate getDateBorn() {
         return dateBorn;
+    }
+
+    public void setDateBorn(LocalDate dateBorn) {
+        this.dateBorn = dateBorn;
+    }
+
+    public List<Book> getListBooks() {
+        return listBooks;
+    }
+
+    public void setListBooks(List<Book> listBooks) {
+        this.listBooks = listBooks;
     }
 
     @Override

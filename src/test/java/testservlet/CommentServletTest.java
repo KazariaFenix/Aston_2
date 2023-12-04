@@ -1,10 +1,8 @@
 package testservlet;
 
-import com.google.gson.Gson;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +19,7 @@ import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServletTest {
-    private Gson gson = new Gson();
+    private ObjectMapper om = new ObjectMapper().findAndRegisterModules();
     @InjectMocks
     private CommentServlet commentServlet;
     @Mock
@@ -34,7 +32,7 @@ class CommentServletTest {
     @Test
     void doPost_whenNormal_returnCommentDto() throws IOException, SQLException {
         final CommentDto commentDto = new CommentDto("Title", "Content");
-        final String responseBody = gson.toJson(commentDto);
+        final String responseBody = om.writeValueAsString(commentDto);
         final long bookId = 1L;
 
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody));
@@ -63,7 +61,7 @@ class CommentServletTest {
     @Test
     void doPost_whenBookNotFound_throwIllegalArgumentException() throws IOException, SQLException {
         final CommentDto commentDto = new CommentDto("Title", "Content");
-        final String responseBody = gson.toJson(commentDto);
+        final String responseBody = om.writeValueAsString(commentDto);
         final long bookId = 1L;
 
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
@@ -91,7 +89,7 @@ class CommentServletTest {
     @Test
     void doPost_whenDatabaseError_throwSQLException() throws IOException, SQLException {
         final CommentDto commentDto = new CommentDto("Title", "Content");
-        final String responseBody = gson.toJson(commentDto);
+        final String responseBody = om.writeValueAsString(commentDto);
         final long bookId = 1L;
 
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
@@ -118,7 +116,7 @@ class CommentServletTest {
     @Test
     void updateComment_whenNormal_thenReturnAuthor() throws IOException, SQLException {
         final CommentDto commentDto = new CommentDto("Title", "Content");
-        final String responseBody = gson.toJson(commentDto);
+        final String responseBody = om.writeValueAsString(commentDto);
         final long commentId = 1L;
 
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody));
@@ -153,7 +151,7 @@ class CommentServletTest {
     void updateComment_whenURIInvalid_thenErrorResponse() throws IOException, SQLException {
         final long commentId = 1;
         final CommentDto commentDto = new CommentDto("Title", "Content");
-        final String responseBody = gson.toJson(commentDto);
+        final String responseBody = om.writeValueAsString(commentDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
                     .doReturn("/comments")
@@ -183,7 +181,7 @@ class CommentServletTest {
     void updateComment_whenCommentNotFound_throwException() throws IOException, SQLException {
         final long commentId = 1;
         final CommentDto commentDto = new CommentDto("Title", "Content");
-        final String responseBody = gson.toJson(commentDto);
+        final String responseBody = om.writeValueAsString(commentDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
                     .doReturn("/comments/1")
@@ -213,7 +211,7 @@ class CommentServletTest {
     void updateComment_whenDatabaseError_throwSQLException() throws IOException, SQLException {
         final long commentId = 1;
         final CommentDto commentDto = new CommentDto("Title", "Content");
-        final String responseBody = gson.toJson(commentDto);
+        final String responseBody = om.writeValueAsString(commentDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
                     .doReturn("/books/1")
@@ -321,7 +319,7 @@ class CommentServletTest {
         final CommentDto commentDto = new CommentDto("Title", "Content");
         final CommentDto commentDto1 = new CommentDto("Title", "Content1");
 
-        String responseBody = gson.toJson(List.of(commentDto, commentDto1));
+        String responseBody = om.writeValueAsString(List.of(commentDto, commentDto1));
         Mockito
                 .doReturn("1")
                 .when(request).getParameter("book");

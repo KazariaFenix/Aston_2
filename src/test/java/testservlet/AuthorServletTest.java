@@ -1,6 +1,6 @@
 package testservlet;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +22,7 @@ import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorServletTest {
-    private Gson gson = new Gson();
+    private ObjectMapper om = new ObjectMapper().findAndRegisterModules();
     @InjectMocks
     private AuthorServlet authorServlet;
     @Mock
@@ -36,7 +36,7 @@ class AuthorServletTest {
     void doPost_whenNormal_returnAuthorDto() throws IOException, SQLException {
         final AuthorDto authorDto = new AuthorDto("Vladimir",
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
-        final String responseBody = gson.toJson(authorDto);
+        final String responseBody = om.writeValueAsString(authorDto);
 
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody));
              PrintWriter pw = new PrintWriter(new StringWriter().append(responseBody))) {
@@ -62,7 +62,7 @@ class AuthorServletTest {
     void doPost_whenRepeatName_throwIllegalArgumentException() throws IOException, SQLException {
         final AuthorDto authorDto = new AuthorDto("Vladimir",
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
-        final String responseBody = gson.toJson(authorDto);
+        final String responseBody = om.writeValueAsString(authorDto);
 
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
@@ -86,7 +86,7 @@ class AuthorServletTest {
     void doPost_whenRepeatName_throwSQLException() throws IOException, SQLException {
         final AuthorDto authorDto = new AuthorDto("Vladimir",
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
-        final String responseBody = gson.toJson(authorDto);
+        final String responseBody = om.writeValueAsString(authorDto);
 
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
@@ -111,7 +111,7 @@ class AuthorServletTest {
         final long authorId = 1;
         final AuthorDto authorDto = new AuthorDto("Vladimir",
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
-        final String responseBody = gson.toJson(authorDto);
+        final String responseBody = om.writeValueAsString(authorDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody));
              PrintWriter pw = new PrintWriter(new StringWriter().append(responseBody))) {
             Mockito
@@ -145,7 +145,7 @@ class AuthorServletTest {
         final long authorId = 1;
         final AuthorDto authorDto = new AuthorDto("Vladimir",
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
-        final String responseBody = gson.toJson(authorDto);
+        final String responseBody = om.writeValueAsString(authorDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
                     .doReturn("/authors")
@@ -176,7 +176,7 @@ class AuthorServletTest {
         final long authorId = 1;
         final AuthorDto authorDto = new AuthorDto("Vladimir",
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
-        final String responseBody = gson.toJson(authorDto);
+        final String responseBody = om.writeValueAsString(authorDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
                     .doReturn("/authors/1")
@@ -208,7 +208,7 @@ class AuthorServletTest {
         final long authorId = 1;
         final AuthorDto authorDto = new AuthorDto("Vladimir",
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
-        final String responseBody = gson.toJson(authorDto);
+        final String responseBody = om.writeValueAsString(authorDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
                     .doReturn("/authors/1")
@@ -316,7 +316,7 @@ class AuthorServletTest {
         final long authorId = 1;
         final AuthorDto authorDto = new AuthorDto("Vladimir",
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
-        String responseBody = gson.toJson(authorDto);
+        String responseBody = om.writeValueAsString(authorDto);
         Mockito
                 .doReturn("/authors/1")
                 .when(request).getRequestURI();
@@ -344,7 +344,7 @@ class AuthorServletTest {
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
         final AuthorDto authorDto1 = new AuthorDto("Alex",
                 LocalDate.of(1960, 10, 21), new ArrayList<>());
-        String responseBody = gson.toJson(authorDto);
+        String responseBody = om.writeValueAsString(authorDto);
         Mockito
                 .doReturn("/authors")
                 .when(request).getRequestURI();

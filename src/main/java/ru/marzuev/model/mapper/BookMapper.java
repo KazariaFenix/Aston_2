@@ -19,7 +19,7 @@ public class BookMapper {
     }
 
     public static Book toBook(BookDto bookDto, long bookId) {
-        return new Book(bookId, bookDto.getTitle(), bookDto.getdescription(), bookDto.getRelease());
+        return new Book(bookId, bookDto.getTitle(), bookDto.getDescription(), bookDto.getRelease());
     }
 
 }

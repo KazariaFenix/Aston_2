@@ -1,6 +1,6 @@
 package ru.marzuev.servlet;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.marzuev.db.ConnectionManagerImpl;
 import ru.marzuev.model.dto.CommentDto;
 import ru.marzuev.repository.impl.BookRepositoryImpl;
@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 public class CommentServlet extends HttpServlet {
-    private Gson gson = new Gson();
+    private ObjectMapper om = new ObjectMapper().findAndRegisterModules();
     private CommentService commentService = new CommentServiceImpl(
             new CommentRepositoryImpl(new ConnectionManagerImpl()),
             new BookRepositoryImpl(new ConnectionManagerImpl())
@@ -27,7 +27,7 @@ public class CommentServlet extends HttpServlet {
         String responseBody;
         try {
             long bookId = Long.parseLong(request.getParameter("book"));
-            responseBody = gson.toJson(commentService.getCommentsByBookId(bookId));
+            responseBody = om.writeValueAsString(commentService.getCommentsByBookId(bookId));
             response.getWriter().println(responseBody);
         } catch (IllegalArgumentException e) {
             response.sendError(404, "Book Not Found");
@@ -46,8 +46,8 @@ public class CommentServlet extends HttpServlet {
                 requestBody.append(bf.readLine());
             }
             long bookId = Long.parseLong(request.getParameter("book"));
-            commentDto = gson.fromJson(requestBody.toString(), CommentDto.class);
-            String responseBody = gson.toJson(commentService.addComment(commentDto,
+            commentDto = om.readValue(requestBody.toString(), CommentDto.class);
+            String responseBody = om.writeValueAsString(commentService.addComment(commentDto,
                     bookId));
             response.getWriter().println(responseBody);
         } catch (IllegalArgumentException e) {
@@ -68,8 +68,8 @@ public class CommentServlet extends HttpServlet {
             if (!request.getServletPath().equals(request.getRequestURI())) {
                 int lastIndex = request.getRequestURI().lastIndexOf("/");
                 long commentId = Long.parseLong(request.getRequestURI().substring(lastIndex + 1));
-                commentDto = gson.fromJson(requestBody.toString(), CommentDto.class);
-                String responseBody = gson.toJson(commentService.updateComment(commentDto, commentId));
+                commentDto = om.readValue(requestBody.toString(), CommentDto.class);
+                String responseBody = om.writeValueAsString(commentService.updateComment(commentDto, commentId));
                 response.getWriter().println(responseBody);
             } else {
                 response.sendError(406, "Comment Id Invalid");

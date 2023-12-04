@@ -10,6 +10,9 @@ public class AuthorDto {
     private LocalDate dateBorn;
     private List<String> booksList;
 
+    public AuthorDto() {
+    }
+
     public AuthorDto(String name, LocalDate dateBorn, List<String> booksList) {
         this.name = name;
         this.dateBorn = dateBorn;
@@ -20,10 +23,25 @@ public class AuthorDto {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public LocalDate getDateBorn() {
         return dateBorn;
     }
 
+    public void setDateBorn(LocalDate dateBorn) {
+        this.dateBorn = dateBorn;
+    }
+
+    public List<String> getBooksList() {
+        return booksList;
+    }
+
+    public void setBooksList(List<String> booksList) {
+        this.booksList = booksList;
+    }
 
     @Override
     public boolean equals(Object o) {

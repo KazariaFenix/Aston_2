@@ -1,6 +1,6 @@
 package testservlet;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class BookServletTest {
-    private Gson gson = new Gson();
+    private ObjectMapper om = new ObjectMapper().findAndRegisterModules();
     @InjectMocks
     private BookServlet bookServlet;
     @Mock
@@ -37,7 +37,7 @@ class BookServletTest {
                 new ArrayList<>());
         final BookDto bookDto1 = new BookDto("Title", "Description", LocalDate.of(1999, 10,5),
                 new ArrayList<>(List.of(1L)), new ArrayList<>());
-        final String responseBody = gson.toJson(bookDto);
+        final String responseBody = om.writeValueAsString(bookDto);
         final List<Long> authorList = new ArrayList<>();
         authorList.add(1L);
 
@@ -68,7 +68,7 @@ class BookServletTest {
     void doPost_whenAuthorNotFound_throwIllegalArgumentException() throws IOException, SQLException {
         final BookDto bookDto = new BookDto("Title", "Description", LocalDate.now(), List.of(1L),
                 new ArrayList<>());
-        final String responseBody = gson.toJson(bookDto);
+        final String responseBody = om.writeValueAsString(bookDto);
 
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
@@ -96,7 +96,7 @@ class BookServletTest {
     void doPost_whenRepeatTitle_throwSQLException() throws IOException, SQLException {
         final BookDto bookDto = new BookDto("Title", "Description", LocalDate.now(), List.of(1L),
                 new ArrayList<>());
-        final String responseBody = gson.toJson(bookDto);
+        final String responseBody = om.writeValueAsString(bookDto);
 
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
@@ -124,7 +124,7 @@ class BookServletTest {
         final long bookId = 1;
         final BookDto bookDto = new BookDto("Title", "Description", LocalDate.now(), List.of(1L),
                 new ArrayList<>());
-        final String responseBody = gson.toJson(bookDto);
+        final String responseBody = om.writeValueAsString(bookDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody));
              PrintWriter pw = new PrintWriter(new StringWriter().append(responseBody))) {
             Mockito
@@ -158,7 +158,7 @@ class BookServletTest {
         final long bookId = 1;
         final BookDto bookDto = new BookDto("Title", "Description", LocalDate.now(), List.of(1L),
                 new ArrayList<>());
-        final String responseBody = gson.toJson(bookDto);
+        final String responseBody = om.writeValueAsString(bookDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
                     .doReturn("/books")
@@ -189,7 +189,7 @@ class BookServletTest {
         final long bookId = 1;
         final BookDto bookDto = new BookDto("Title", "Description", LocalDate.now(), List.of(1L),
                 new ArrayList<>());
-        final String responseBody = gson.toJson(bookDto);
+        final String responseBody = om.writeValueAsString(bookDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
                     .doReturn("/books/1")
@@ -220,7 +220,7 @@ class BookServletTest {
         final long bookId = 1;
         final BookDto bookDto = new BookDto("Title", "Description", LocalDate.now(), List.of(1L),
                 new ArrayList<>());
-        final String responseBody = gson.toJson(bookDto);
+        final String responseBody = om.writeValueAsString(bookDto);
         try (BufferedReader bf = new BufferedReader(new StringReader(responseBody))) {
             Mockito
                     .doReturn("/books/1")
@@ -327,7 +327,7 @@ class BookServletTest {
         final long bookId = 1;
         final BookDto bookDto = new BookDto("Title", "Description", LocalDate.now(), List.of(1L),
                 new ArrayList<>());
-        String responseBody = gson.toJson(bookDto);
+        String responseBody = om.writeValueAsString(bookDto);
         Mockito
                 .doReturn("/books/1")
                 .when(request).getRequestURI();
@@ -356,7 +356,7 @@ class BookServletTest {
                 new ArrayList<>());
         final BookDto bookDto1 = new BookDto("Title1", "Description", LocalDate.now(), List.of(1L),
                 new ArrayList<>());
-        String responseBody = gson.toJson(bookDto);
+        String responseBody = om.writeValueAsString(bookDto);
         Mockito
                 .doReturn("/books")
                 .when(request).getRequestURI();
